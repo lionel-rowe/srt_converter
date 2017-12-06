@@ -2,19 +2,27 @@
 <html lang="en" >
   <head>
     <meta charset="UTF-8">
-    <title>SRT Converter (WIP)</title>
+    <title>InqScribe => SRT Converter</title>
     <link rel="stylesheet" href="css/style.css">
   </head>
-
   <body>
+    <h1>InqScribe => SRT Converter</h1>
+    <div class="section">
+      <form id="conversionForm">
+        <div>
+          <textarea placeholder="Paste source here" id="input"></textarea>
+        </div>
+        <label for="">File name: 
+          <input type="text" id="filename" value="subtitles">
+          <span class="extension">.src</span>
+        </label>
+        <input type="submit" value="Convert">
+      </form>
+    </div>
+    <div class="section">
+      <div id="output" class="hidden"></div>
+    </div>
 
-    <form id="conversionForm">
-    <textarea placeholder="Paste source here" id="input"></textarea>
-    <textarea readonly placeholder="Output" id="output"></textarea>
-    <input type="submit" value="Convert">
-  </form>
-    
-  <script src="js/index.js"></script>
-
+    <script src="js/index.js"></script>
   </body>
 </html>
