@@ -34,7 +34,7 @@ textarea {
   visibility: hidden;
 }
 
-.lineNo {
+/*.lineNo {
   display: inline-block;
   text-align: right;
   padding: 0 5px;
@@ -43,14 +43,21 @@ textarea {
   background: #444;
   vertical-align: top;
   user-select: none;
-}
+}*/
 
-.lineContent {
+.lineContent::before {
   display: inline-block;
-  padding: 0 5px;
-  width: calc(100% - 3em);
+  text-align: right;
+  padding: 0 5px 0 0;
+  margin: 0 5px 0 0;
+  width: 2.2em;
+  color: white;
+  background: #444;
+  vertical-align: top;
+  user-select: none;
+  content: attr(data-linenumber);
 }
-
+/*
 .warnTooManyLines {
   background: #fcc;
 }
@@ -58,3 +65,4 @@ textarea {
 .warnLineTooLong {
   color: #d00;
 }
+*/

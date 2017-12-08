@@ -2,6 +2,7 @@ const CRLF = '\r\n';
 
 const inputField = document.querySelector('#input');
 const outputDisplay = document.querySelector('#output');
+const warningDisplay = document.querySelector('#warnings');
 
 const maxLines = 2;
 const maxLineLength = 45;
@@ -13,8 +14,23 @@ function guessFps(maxFrame) {
   return fps ? fps : 60;
 }
 
+function escapeHTML(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+} 
+
+function show(el) {
+  el.classList.remove('hidden');
+}
+
+function hide(el) {
+  el.classList.add('hidden');
+}
+
 document.querySelector('#conversionForm').addEventListener('submit', e => {
   e.preventDefault();
+
+  hide(outputDisplay);
+  hide(warningDisplay);
 
   if (/^\s*$/.test(inputField.value)) {
     return;
@@ -23,7 +39,7 @@ document.querySelector('#conversionForm').addEventListener('submit', e => {
 	const input = inputField.value.split(/\r?\n/g);
   const outputArr = [];
   let counter = 1;
-  let warnings = false;
+  let warnings = [];
 
   for (let i = 0; i < input.length; i++) { // building JSON
     const line = input[i];
@@ -89,7 +105,7 @@ document.querySelector('#conversionForm').addEventListener('submit', e => {
     return `${('' + st.hr).padStart(2, '0')}:${('' + st.min).padStart(2, '0')}:${('' + st.sec).padStart(2, '0')},${('' + (getMs(st) + offsetMs)).padStart(3, '0')}`;
   }
 
-  function getOutput(warn) {
+  function getOutput() {
     let output = '';
 
     outputArr.forEach((st, idx) => { // building output string
@@ -108,18 +124,14 @@ document.querySelector('#conversionForm').addEventListener('submit', e => {
       
       output += CRLF;
       
-      if (!warn) {
-        output += st.lines.join(CRLF);
-      } else {
-        output += st.lines.map(line => {
-          if (st.lines.length > maxLines || line.length > maxLineLength) {
-            warnings = true;
-            return `<span class="${st.lines.length > maxLines ? 'warnTooManyLines' : ''} ${line.length > maxLineLength ? 'warnLineTooLong' : ''}">${line}</span>`;
-          } else {
-            return line;
-          }
-        }).join(CRLF);
+      output += st.lines.join(CRLF);
+
+      if (st.lines.length > maxLines) {
+        warnings.push(1);
       }
+      if (st.lines.some((line) => line.length > maxLineLength)) {
+        warnings.push(2);
+      } //TODO: add warning functionality line number
       
       output += idx !== outputArr.length - 1 ? CRLF.repeat(2) : CRLF;
 
@@ -128,9 +140,7 @@ document.querySelector('#conversionForm').addEventListener('submit', e => {
     return output;
   }
   
-  const output = getOutput(false);
-
-  const outputWithWarnings = getOutput(true);
+  const output = getOutput();
 
   const uri = `data:text/plain;charset=utf-8,${encodeURIComponent(output)}`;
 
@@ -139,21 +149,15 @@ document.querySelector('#conversionForm').addEventListener('submit', e => {
   dummyLink.setAttribute('href', uri);
   dummyLink.click();
 
-  outputDisplay.classList.remove('hidden');
-  outputDisplay.innerHTML = outputWithWarnings.split(CRLF).map((el, idx) => {
-    const lineNo = `<span class="lineNo">${idx + 1}</span>`;
-    const lineContent = `<span class="lineContent">${el}</span>`;
+  show(outputDisplay);
+  outputDisplay.innerHTML = output.split(CRLF).map((el, idx) => {
 
-    return `<div>${lineNo}${lineContent}</div>`
-  }).join('');
+    return `<div class="lineContent" data-linenumber="${idx + 1}">${escapeHTML(el)}</div>`;
+  }).join(CRLF);
 
-  if (warnings) {
-    setTimeout(() => { //make async so output displayed first
-      alert(`Finished, but with warnings. Please see output:
-    }
-- Red background: keyframe has > ${maxLines} lines
-- Red text: line length > ${maxLineLength}`);
-    }, 0);
-  }
+/*  if (warnings.length) {
+    show(warningDisplay);
+    warningDisplay.textContent = warnings;
+  }*/ //TODO: add warning functionality line number
 
 });
