@@ -6,15 +6,16 @@
     <link rel="stylesheet" href="css/style.css">
   </head>
   <body>
+    <a class="topIcon" href="config.html"><i>[SETTINGS]</i></a> <!-- TODO: use FA -->
     <h1>InqScribe → SRT Converter</h1>
     <div class="section">
       <form id="conversionForm">
         <div>
-          <textarea placeholder="Paste source here" id="input"></textarea>
+          <input type="file" id="fileUpload" accept=".txt">
         </div>
-        <label for="">File name: 
+        <label for="">Output file name: 
           <input type="text" id="filename" value="subtitles">
-          <span class="extension">.src</span>
+          <span class="extension">.srt</span>
         </label>
         <input type="submit" value="Convert">
       </form>

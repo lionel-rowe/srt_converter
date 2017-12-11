@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" >
+  <head>
+    <meta charset="UTF-8">
+    <title>InqScribe → SRT Converter (Settings)</title>
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+    <a class="topIcon" href="index.html"><i>[BACK]</i></a> <!-- TODO: use FA -->
+    <h1>Settings</h1>
+    <div class="section">
+      <form id="configForm">
+        <fieldset id="conversions">
+          <legend>Markup Conversion</legend>
+          <table>
+            <thead>
+              <th>Markup</th>
+              <th>Convert</th>
+              <th>Do nothing</th>
+              <th>Remove</th>
+            </thead>
+            <tbody>
+              <tr>
+                <td># → ♫</td>
+                <td><input type="radio" name="music" value="1" checked></td>
+                <td><input type="radio" name="music" value="0"></td>
+                <td><input type="radio" name="music" value="-1"></td>
+              </tr>
+              <tr>
+                <td>* → <i>&lt;i&gt;</i></td>
+                <td><input type="radio" name="italic" value="1" checked></td>
+                <td><input type="radio" name="italic" value="0"></td>
+                <td><input type="radio" name="italic" value="-1"></td>
+              </tr>
+              <tr>
+                <td>** → <b>&lt;b&gt;</b></td>
+                <td><input type="radio" name="bold" value="1" checked></td>
+                <td><input type="radio" name="bold" value="0"></td>
+                <td><input type="radio" name="bold" value="-1"></td>
+              </tr>
+            </tbody>
+          </table>
+        </fieldset>
+        <fieldset id="warnings">
+          <legend>Warnings</legend>
+          <div>
+            Display warnings if any keyframes are...
+          </div>
+          <div>
+            <label for="maxLineNo">
+              <input type="checkbox" id="maxLineNoCheckbox" checked>
+              &gt; <input type="number" id="maxLineNo" value="2" min="0"> lines in height
+            </label>
+          </div>
+          <div>
+            <label for="maxLineLength">
+              <input type="checkbox" id="maxLineLengthCheckbox" checked>
+              &gt; <input type="number" id="maxLineLength" value="45" min="0"> characters in width
+            </label>
+          </div>
+          <div>
+            <label for="minBetweenKeyframes">
+              <input type="checkbox" id="minBetweenKeyframesCheckbox" checked>
+              &lt; <input type="number" id="minBetweenKeyframes" value="1500" min="0"> ms in duration
+            </label>
+          </div>
+        </fieldset>
+        <fieldset id="timings">
+          <legend>Timing</legend>
+          <div>
+            <label for="offset">
+              Offset each keyframe by
+              <input type="number" id="offset" value="0">
+              ms
+            </label>
+          </div>
+          <div>
+            <label for="maxKeyframe">
+              Display keyframes for up to
+              <input type="number" id="maxKeyframe" value="5000">
+              ms
+            </label>
+          </div>
+        </fieldset>
+        <fieldset id="other">
+          <legend>Other</legend>
+          <label for="locale">
+            Language: 
+            <select id="locale">
+              <option value="en-us">English (US)</option>
+              <option value="zh-cn">Chinese (PRC simplified)</option>
+            </select>
+          </label>
+        </fieldset>
+        <input type="submit" value="Save Settings" id="saveButton">
+        <input type="reset" value="Reset All" id="resetButton">
+
+<!-- conversions: { // 1 = convert; 0 = do nothing; -1 = remove
+    music: 1,
+    italic: 1,
+    bold: 1,
+  },
+  warnings: { // >1 = number; 0 = turned off
+    maxLineNo: 2,
+    maxLineLength: 45,
+    minBetweenKeyframes: 1500 //ms
+  },
+  timings: { // in ms
+    offset: 0,
+    maxKeyframe: 5000
+  },
+  locale: 'en-us'
+}; -->
+      </form>
+    </div>
+    <script src="js/config.js"></script>
+  </body>
+</html>
