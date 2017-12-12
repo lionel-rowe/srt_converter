@@ -3,7 +3,7 @@
 module.exports = {
   entry: {
     index: './src/index.js',
-    config: './src/config.js'
+    settings: './src/settings.js'
   },
   output: {
     filename: './assets/[name].bundle.js'

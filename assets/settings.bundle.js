@@ -33,9 +33,6 @@
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
 /******/
-/******/ 	// identity function for calling harmony imports with the correct context
-/******/ 	__webpack_require__.i = function(value) { return value; };
-/******/
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
@@ -63,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -71,8 +68,8 @@
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return defaultConfig; });
-const defaultConfig = {
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return defaultSettings; });
+const defaultSettings = {
   conversions: { // 1 = convert; 0 = do nothing; -1 = remove
     music: 1,
     italics: 1,
@@ -93,18 +90,19 @@ const defaultConfig = {
 
 
 /***/ }),
-/* 1 */
+/* 1 */,
+/* 2 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__defaultConfig_js__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__defaultSettings_js__ = __webpack_require__(0);
 
 
 
 // TODO: make the whole thing less spaghetti-code like + DRY up
 
-const configForm = document.querySelector('#configForm');
+const settingsForm = document.querySelector('#settingsForm');
 
 function pipe(input, ...funcs) {
   //TODO: remove this nonsense (from this module)
@@ -131,7 +129,7 @@ function setFields() {
 
   let vals;
 
-  const stored = localStorage.config ? JSON.parse(localStorage.config) : undefined;
+  const stored = localStorage.settings ? JSON.parse(localStorage.settings) : undefined;
 
   if (!stored) {
     vals = {
@@ -154,9 +152,9 @@ function setFields() {
 
 setFields();
 
-configForm.addEventListener('submit', e => {
+settingsForm.addEventListener('submit', e => {
   e.preventDefault();
-  localStorage.setItem('config', JSON.stringify({
+  localStorage.setItem('settings', JSON.stringify({
     conversions: { // 1 = convert; 0 = do nothing; -1 = remove
       music: +pipe('music', radio, qs, val),
       italics: +pipe('italics', radio, qs, val),
@@ -175,9 +173,9 @@ configForm.addEventListener('submit', e => {
   }));
 });
 
-configForm.addEventListener('reset', e => {
+settingsForm.addEventListener('reset', e => {
   e.preventDefault();
-  localStorage.removeItem('config');
+  localStorage.removeItem('settings');
   setFields();
 });
 

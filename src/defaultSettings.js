@@ -1,4 +1,4 @@
-const defaultConfig = {
+const defaultSettings = {
   conversions: { // 1 = convert; 0 = do nothing; -1 = remove
     music: 1,
     italics: 1,
@@ -16,4 +16,4 @@ const defaultConfig = {
   locale: 'en-us'
 };
 
-export {defaultConfig};
+export {defaultSettings};

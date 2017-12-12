@@ -1,9 +1,9 @@
 
-import {defaultConfig} from './defaultConfig.js';
+import {defaultSettings} from './defaultSettings.js';
 
 // TODO: make the whole thing less spaghetti-code like + DRY up
 
-const configForm = document.querySelector('#configForm');
+const settingsForm = document.querySelector('#settingsForm');
 
 function pipe(input, ...funcs) { //TODO: remove this nonsense (from this module)
   let output = input;
@@ -29,8 +29,8 @@ function setFields() {
 
   let vals;
 
-  const stored = localStorage.config
-    ? JSON.parse(localStorage.config)
+  const stored = localStorage.settings
+    ? JSON.parse(localStorage.settings)
     : undefined;
 
   if (!stored) {
@@ -55,9 +55,9 @@ function setFields() {
 
 setFields();
 
-configForm.addEventListener('submit', (e) => {
+settingsForm.addEventListener('submit', (e) => {
   e.preventDefault();
-  localStorage.setItem('config', JSON.stringify({
+  localStorage.setItem('settings', JSON.stringify({
     conversions: { // 1 = convert; 0 = do nothing; -1 = remove
       music: +pipe('music', radio, qs, val),
       italics: +pipe('italics', radio, qs, val),
@@ -76,8 +76,8 @@ configForm.addEventListener('submit', (e) => {
   }));
 });
 
-configForm.addEventListener('reset', (e) => {
+settingsForm.addEventListener('reset', (e) => {
   e.preventDefault();
-  localStorage.removeItem('config');
+  localStorage.removeItem('settings');
   setFields();
 });

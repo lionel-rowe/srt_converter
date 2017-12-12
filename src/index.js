@@ -1,4 +1,4 @@
-import {defaultConfig} from './defaultConfig.js';
+import {defaultSettings} from './defaultSettings.js';
 
 const CRLF = '\r\n';
 
@@ -7,10 +7,10 @@ const outputDisplay = document.querySelector('#output');
 const warningDisplay = document.querySelector('#warnings');
 const fileUpload = document.querySelector('#fileUpload');
 
-const config = localStorage.config
-  ? JSON.parse(localStorage.config)  : defaultConfig;
+const settings = localStorage.settings
+  ? JSON.parse(localStorage.settings)  : defaultSettings;
 
-console.log(config);
+console.log(settings);
 
 function pipe(input, ...funcs) {
   let output = input;
@@ -185,18 +185,18 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
       const startTime = getTimestamp(startMs);
 
       const endTime = 
-        nextStartMs === undefined || nextStartMs - startMs > config.timing.maxKeyframe
-        ? getTimestamp(startMs + config.timing.maxKeyframe)
+        nextStartMs === undefined || nextStartMs - startMs > settings.timing.maxKeyframe
+        ? getTimestamp(startMs + settings.timing.maxKeyframe)
         : getTimestamp(nextStartMs - 1);
 
       appendLine(`${startTime} --> ${endTime}`)
 
       appendContentLines(st.lines);
 
-      /*if (st.lines.length > config.warnings.maxLineNo) {
+      /*if (st.lines.length > settings.warnings.maxLineNo) {
         warnings.push(1);
       }
-      if (st.lines.some((line) => line.length > config.warnings.maxLineLength)) {
+      if (st.lines.some((line) => line.length > settings.warnings.maxLineLength)) {
         warnings.push(2);
       }*/ //TODO: add warning functionality w. line number
             

@@ -33,9 +33,6 @@
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
 /******/
-/******/ 	// identity function for calling harmony imports with the correct context
-/******/ 	__webpack_require__.i = function(value) { return value; };
-/******/
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
@@ -63,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -71,8 +68,8 @@
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return defaultConfig; });
-const defaultConfig = {
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return defaultSettings; });
+const defaultSettings = {
   conversions: { // 1 = convert; 0 = do nothing; -1 = remove
     music: 1,
     italics: 1,
@@ -93,13 +90,12 @@ const defaultConfig = {
 
 
 /***/ }),
-/* 1 */,
-/* 2 */
+/* 1 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__defaultConfig_js__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__defaultSettings_js__ = __webpack_require__(0);
 
 
 const CRLF = '\r\n';
@@ -109,9 +105,9 @@ const outputDisplay = document.querySelector('#output');
 const warningDisplay = document.querySelector('#warnings');
 const fileUpload = document.querySelector('#fileUpload');
 
-const config = localStorage.config ? JSON.parse(localStorage.config) : __WEBPACK_IMPORTED_MODULE_0__defaultConfig_js__["a" /* defaultConfig */];
+const settings = localStorage.settings ? JSON.parse(localStorage.settings) : __WEBPACK_IMPORTED_MODULE_0__defaultSettings_js__["a" /* defaultSettings */];
 
-console.log(config);
+console.log(settings);
 
 function pipe(input, ...funcs) {
   let output = input;
@@ -276,16 +272,16 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
 
       const startTime = getTimestamp(startMs);
 
-      const endTime = nextStartMs === undefined || nextStartMs - startMs > config.timing.maxKeyframe ? getTimestamp(startMs + config.timing.maxKeyframe) : getTimestamp(nextStartMs - 1);
+      const endTime = nextStartMs === undefined || nextStartMs - startMs > settings.timing.maxKeyframe ? getTimestamp(startMs + settings.timing.maxKeyframe) : getTimestamp(nextStartMs - 1);
 
       appendLine(`${startTime} --> ${endTime}`);
 
       appendContentLines(st.lines);
 
-      /*if (st.lines.length > config.warnings.maxLineNo) {
+      /*if (st.lines.length > settings.warnings.maxLineNo) {
         warnings.push(1);
       }
-      if (st.lines.some((line) => line.length > config.warnings.maxLineLength)) {
+      if (st.lines.some((line) => line.length > settings.warnings.maxLineLength)) {
         warnings.push(2);
       }*/ //TODO: add warning functionality w. line number
 
@@ -333,13 +329,11 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
   - Default # of seconds to display subtitle
   */
 
-  /*TODO: store user settings (+ most recent filename used) in browser*/
-
   /*TODO: use (visible) bounding box to check line length instead of
   no of chars (and update SG to reflect this)
   */
 
-  /*TODO: clean up/modularize code + use webpack*/
+  /*TODO: clean up/modularize code*/
 
   /*TODO: add tests (incl. overall functionality, line length + no, markdown + music note support)*/
 });
