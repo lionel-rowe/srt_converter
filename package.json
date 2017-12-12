@@ -1,0 +1,29 @@
+{
+  "name": "srt_converter",
+  "version": "0.1.0",
+  "description": "InqScribe => SRT converter",
+  "main": "webpack.config.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lionel-rowe/srt_converter.git"
+  },
+  "author": "Lionel Rowe (lionel.rowe@gmail.com)",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/lionel-rowe/srt_converter/issues"
+  },
+  "homepage": "https://github.com/lionel-rowe/srt_converter#readme",
+  "dependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2"
+  },
+  "devDependencies": {
+    "source-list-map": "^2.0.0"
+  }
+}

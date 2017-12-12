@@ -28,9 +28,9 @@
               </tr>
               <tr>
                 <td>* → <i>&lt;i&gt;</i></td>
-                <td><input type="radio" name="italic" value="1" checked></td>
-                <td><input type="radio" name="italic" value="0"></td>
-                <td><input type="radio" name="italic" value="-1"></td>
+                <td><input type="radio" name="italics" value="1" checked></td>
+                <td><input type="radio" name="italics" value="0"></td>
+                <td><input type="radio" name="italics" value="-1"></td>
               </tr>
               <tr>
                 <td>** → <b>&lt;b&gt;</b></td>
@@ -65,7 +65,7 @@
             </label>
           </div>
         </fieldset>
-        <fieldset id="timings">
+        <fieldset id="timing">
           <legend>Timing</legend>
           <div>
             <label for="offset">
@@ -97,7 +97,7 @@
 
 <!-- conversions: { // 1 = convert; 0 = do nothing; -1 = remove
     music: 1,
-    italic: 1,
+    italics: 1,
     bold: 1,
   },
   warnings: { // >1 = number; 0 = turned off
@@ -105,7 +105,7 @@
     maxLineLength: 45,
     minBetweenKeyframes: 1500 //ms
   },
-  timings: { // in ms
+  timing: { // in ms
     offset: 0,
     maxKeyframe: 5000
   },
@@ -113,6 +113,6 @@
 }; -->
       </form>
     </div>
-    <script src="js/config.js"></script>
+    <script src="assets/config.bundle.js"></script>
   </body>
 </html>
