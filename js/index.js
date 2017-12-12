@@ -120,7 +120,7 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
   const fps = guessFps(Math.max(...outputArr.map(st => st.fr)));
   
   function getMs(st) {
-    return Math.floor((1000 / fps) * st.fr);
+    return Math.floor((1000 / fps) * (st.fr - 1));
   }
   
   function getTotalSecs(st) {
@@ -138,7 +138,9 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
     return {hr, min, sec};
   }
 
-  function getTs(st, offsetSecs, offsetMs) { //TODO: refactor this nonsense (make MS part of original JSON)
+  function getTs(st, offsetSecs, offsetMs) { //TODO: refactor this nonsense (make MS part of original JSON);
+    //base everything on ms
+    //eliminate 1000 ms
     
     if (offsetSecs) {
 
