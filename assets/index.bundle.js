@@ -33,9 +33,6 @@
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
 /******/
-/******/ 	// identity function for calling harmony imports with the correct context
-/******/ 	__webpack_require__.i = function(value) { return value; };
-/******/
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
@@ -73,20 +70,21 @@
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return defaultSettings; });
 const defaultSettings = {
-  conversions: { // 1 = convert; 0 = do nothing; -1 = remove
-    music: 1,
-    italics: 1,
-    bold: 1
-  },
-  warnings: { // >1 = number; 0 = turned off
-    maxLineNo: 2,
-    maxLineLength: 45,
-    minBetweenKeyframes: 1500 //ms
-  },
-  timing: { // in ms
-    offset: 0,
-    maxKeyframe: 5000
-  },
+  // Conversions: 1 = convert; 0 = do nothing; -1 = remove
+  convertMusic: 1,
+  convertItalics: 1,
+  convertBold: 1,
+
+  // Warnings: >0 = specified number; 0 = turned off
+  warnMaxLineNo: 2,
+  warnMaxLineLength: 45,
+  warnMinBetweenKeyframes: 1500, //ms
+
+  // Timing: in ms
+  offset: 0,
+  maxKeyframe: 5000,
+
+  // Other
   locale: 'en-us'
 };
 
@@ -99,6 +97,8 @@ const defaultSettings = {
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__defaultSettings_js__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__helpers_js__ = __webpack_require__(2);
+
 
 
 const CRLF = '\r\n';
@@ -109,17 +109,19 @@ const warningDisplay = document.querySelector('#warnings');
 const fileUpload = document.querySelector('#fileUpload');
 const filenameInput = document.querySelector('#filename');
 
-const settings = localStorage.settings ? JSON.parse(localStorage.settings) : __WEBPACK_IMPORTED_MODULE_0__defaultSettings_js__["a" /* defaultSettings */];
+const settings = {};
+
+Object.keys(localStorage).forEach(key => {
+  settings[key] = typeof __WEBPACK_IMPORTED_MODULE_0__defaultSettings_js__["a" /* defaultSettings */][key] === 'number' ? +localStorage[key] : localStorage[key];
+});
+
+Object.keys(__WEBPACK_IMPORTED_MODULE_0__defaultSettings_js__["a" /* defaultSettings */]).forEach(key => {
+  if (!localStorage[key]) {
+    settings[key] = __WEBPACK_IMPORTED_MODULE_0__defaultSettings_js__["a" /* defaultSettings */][key];
+  }
+});
 
 console.log(settings);
-
-function pipe(input, ...funcs) {
-  let output = input;
-  funcs.forEach(func => {
-    output = func(output);
-  });
-  return output;
-}
 
 function guessFps(maxFrame) {
   const fpses = [24, 25, 30, 50, 60];
@@ -144,17 +146,22 @@ function hide(el) {
   el.classList.add('hidden');
 }
 
-let inputSource;
+let inputSource = '';
 
 fileUpload.addEventListener('change', () => {
   const fileReader = new FileReader();
-  fileReader.readAsText(fileUpload.files[0], 'UTF-8');
-  fileReader.addEventListener('load', e => {
-    inputSource = e.target.result;
-    const fileSplit = fileUpload.value ? fileUpload.value.split(/[\\\/]/) : undefined;
-    const filename = fileSplit ? fileSplit[fileSplit.length - 1].match(/(.+)\.\w+$/)[1] : undefined;
-    filenameInput.value = filename;
-  });
+  const file = fileUpload.files[0];
+  if (file) {
+    fileReader.readAsText(file, 'UTF-8');
+    fileReader.addEventListener('load', e => {
+      inputSource = e.target.result;
+      const fileSplit = fileUpload.value ? fileUpload.value.split(/[\\\/]/) : undefined;
+      const filename = fileSplit ? fileSplit[fileSplit.length - 1].match(/(.+)\.\w+$/)[1] : undefined;
+      filenameInput.value = filename;
+    });
+  } else {
+    inputSource = '';
+  }
 });
 
 conversionForm.addEventListener('submit', e => {
@@ -190,8 +197,14 @@ conversionForm.addEventListener('submit', e => {
   }
 
   if (!outputArr.length) {
-    alert('Uploaded file is invalid. Please upload a text file with \
+    if (inputSource === '') {
+      alert('No file selected or the selected file is empty. \
+Please upload a text file with \
 timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
+    } else {
+      alert('Uploaded file is invalid. Please upload a text file with \
+timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
+    }
     return;
   }
 
@@ -229,21 +242,36 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
   }
 
   function getTimestamp(totalMs) {
-    const vals = getHrsMinsSecsMs(totalMs);
+    const vals = getHrsMinsSecsMs(totalMs + settings.offset);
 
     return `${('' + vals.hr).padStart(2, '0')}:${('' + vals.min).padStart(2, '0')}:${('' + vals.sec).padStart(2, '0')},${('' + vals.ms).padStart(3, '0')}`;
   }
 
   function parseBold(contentStr) {
-    return contentStr.replace(/(^|[\b\W])([\*_])\2([\s\S]+?)\2\2($|[\b\W])/g, '$1<b>$3</b>$4');
+    if (settings.convertBold === 0) {
+      return contentStr;
+    } else {
+      const tags = settings.convertBold === 1 ? ['<b>', '</b>'] : ['', ''];
+      return contentStr.replace(/(^|[\b\W])([\*_])\2([\s\S]+?)\2\2($|[\b\W])/g, `$1${tags[0]}$3${tags[1]}$4`);
+    }
   }
 
   function parseItalics(contentStr) {
-    return contentStr.replace(/(^|[\b\W])([\*_])([\s\S]+?)\2($|[\b\W])/g, '$1<i>$3</i>$4');
+    if (settings.convertItalics === 0) {
+      return contentStr;
+    } else {
+      const tags = settings.convertItalics === 1 ? ['<i>', '</i>'] : ['', ''];
+      return contentStr.replace(/(^|[\b\W])([\*_])([\s\S]+?)\2($|[\b\W])/g, `$1${tags[0]}$3${tags[1]}$4`);
+    }
   }
 
   function parseMusic(contentStr) {
-    return contentStr.replace(/^#\s?([\s\S]+?)\s?#$/g, '♫ $1 ♫');
+    if (settings.convertMusic === 0) {
+      return contentStr;
+    } else {
+      const tags = settings.convertMusic === 1 ? ['♫', '♫'] : ['', ''];
+      return contentStr.replace(/^#\s?([\s\S]+?)\s?#$/g, `${tags[0]} $1 ${tags[1]}`);
+    }
   }
 
   function getOutput() {
@@ -261,7 +289,7 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
       //as arr of strs
       const numOfLines = lines.length;
       const contentStr = lines.map(line => line.trim()).join(CRLF);
-      const parsedContentStr = pipe(contentStr, parseBold, parseItalics, parseMusic);
+      const parsedContentStr = Object(__WEBPACK_IMPORTED_MODULE_1__helpers_js__["a" /* pipe */])(contentStr, parseBold, parseItalics, parseMusic);
 
       output += parsedContentStr;
       output += CRLF;
@@ -279,16 +307,16 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
 
       const startTime = getTimestamp(startMs);
 
-      const endTime = nextStartMs === undefined || nextStartMs - startMs > settings.timing.maxKeyframe ? getTimestamp(startMs + settings.timing.maxKeyframe) : getTimestamp(nextStartMs - 1);
+      const endTime = nextStartMs === undefined || nextStartMs - startMs > settings.maxKeyframe ? getTimestamp(startMs + settings.maxKeyframe) : getTimestamp(nextStartMs - 1);
 
       appendLine(`${startTime} --> ${endTime}`);
 
       appendContentLines(st.lines);
 
-      /*if (st.lines.length > settings.warnings.maxLineNo) {
+      /*if (st.lines.length > settings.warnMaxLineNo) {
         warnings.push(1);
       }
-      if (st.lines.some((line) => line.length > settings.warnings.maxLineLength)) {
+      if (st.lines.some((line) => line.length > settings.warnMaxLineLength)) {
         warnings.push(2);
       }*/ //TODO: add warning functionality w. line number
 
@@ -313,7 +341,7 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
   show(outputDisplay);
   outputDisplay.innerHTML = output.split(CRLF).map((el, idx) => {
 
-    return `<div class="lineContent" data-linenumber="${idx + 1}">${pipe(el, escapeHTML, unescapeAllowedTags)}</div>`;
+    return `<div class="lineContent" data-linenumber="${idx + 1}">${Object(__WEBPACK_IMPORTED_MODULE_1__helpers_js__["a" /* pipe */])(el, escapeHTML, unescapeAllowedTags)}</div>`;
   }).join(CRLF);
 
   /*  if (warnings.length) {
@@ -345,6 +373,20 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
 
   /*TODO: add tests (incl. overall functionality, line length + no, markdown + music note support)*/
 });
+
+/***/ }),
+/* 2 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = pipe;
+function pipe(input, ...funcs) {
+  let output = input;
+  funcs.forEach(func => {
+    output = func(output);
+  });
+  return output;
+}
 
 /***/ })
 /******/ ]);

@@ -22,24 +22,27 @@
             <tbody>
               <tr>
                 <td># → ♫</td>
-                <td><input type="radio" name="music" value="1" checked></td>
-                <td><input type="radio" name="music" value="0"></td>
-                <td><input type="radio" name="music" value="-1"></td>
+                <td><input type="radio" name="convertMusic" value="1" checked></td>
+                <td><input type="radio" name="convertMusic" value="0"></td>
+                <td><input type="radio" name="convertMusic" value="-1"></td>
               </tr>
               <tr>
                 <td>* → <i>&lt;i&gt;</i></td>
-                <td><input type="radio" name="italics" value="1" checked></td>
-                <td><input type="radio" name="italics" value="0"></td>
-                <td><input type="radio" name="italics" value="-1"></td>
+                <td><input type="radio" name="convertItalics" value="1" checked></td>
+                <td><input type="radio" name="convertItalics" value="0"></td>
+                <td><input type="radio" name="convertItalics" value="-1"></td>
               </tr>
               <tr>
                 <td>** → <b>&lt;b&gt;</b></td>
-                <td><input type="radio" name="bold" value="1" checked></td>
-                <td><input type="radio" name="bold" value="0"></td>
-                <td><input type="radio" name="bold" value="-1"></td>
+                <td><input type="radio" name="convertBold" value="1" checked></td>
+                <td><input type="radio" name="convertBold" value="0"></td>
+                <td><input type="radio" name="convertBold" value="-1"></td>
               </tr>
             </tbody>
           </table>
+          <label for="escapeEntities">
+            <input type="checkbox" id="escapeEntities" disabled> Escape HTML entities (&lt; → <code>&amp;lt;</code>, &gt; → <code>&amp;gt;</code>, &amp; → <code>&amp;amp;</code>)
+          </label>
         </fieldset>
         <fieldset id="warnings">
           <legend>Warnings</legend>
@@ -47,21 +50,21 @@
             Display warnings if any keyframes are...
           </div>
           <div>
-            <label for="maxLineNo">
-              <input type="checkbox" id="maxLineNoCheckbox" checked>
-              &gt; <input type="number" id="maxLineNo" value="2" min="0"> lines in height
+            <label for="warnMaxLineNo">
+              <input type="checkbox" id="warnMaxLineNoCheckbox" disabled>
+              &gt; <input type="number" id="warnMaxLineNo" value="2" min="0" disabled> lines in height
             </label>
           </div>
           <div>
-            <label for="maxLineLength">
-              <input type="checkbox" id="maxLineLengthCheckbox" checked>
-              &gt; <input type="number" id="maxLineLength" value="45" min="0"> characters in width
+            <label for="warnMaxLineLength">
+              <input type="checkbox" id="warnMaxLineLengthCheckbox" disabled>
+              &gt; <input type="number" id="warnMaxLineLength" value="45" min="0" disabled> characters in width
             </label>
           </div>
           <div>
-            <label for="minBetweenKeyframes">
-              <input type="checkbox" id="minBetweenKeyframesCheckbox" checked>
-              &lt; <input type="number" id="minBetweenKeyframes" value="1500" min="0"> ms in duration
+            <label for="warnMinBetweenKeyframes">
+              <input type="checkbox" id="warnMinBetweenKeyframesCheckbox" disabled>
+              &lt; <input type="number" id="warnMinBetweenKeyframes" value="1500" min="0" disabled> ms in duration
             </label>
           </div>
         </fieldset>
@@ -86,14 +89,14 @@
           <legend>Other</legend>
           <label for="locale">
             Language: 
-            <select id="locale">
+            <select id="locale" disabled>
               <option value="en-us">English (US)</option>
               <option value="zh-cn">Chinese (PRC simplified)</option>
             </select>
           </label>
         </fieldset>
         <input type="submit" value="Save Settings" id="saveButton">
-        <input type="reset" value="Reset All" id="resetButton">
+        <input type="reset" value="Reset to Defaults" id="resetButton">
 
 <!-- conversions: { // 1 = convert; 0 = do nothing; -1 = remove
     music: 1,

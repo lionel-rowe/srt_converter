@@ -1,4 +1,5 @@
 import {defaultSettings} from './defaultSettings.js';
+import {pipe} from './helpers.js';
 
 const CRLF = '\r\n';
 
@@ -8,18 +9,19 @@ const warningDisplay = document.querySelector('#warnings');
 const fileUpload = document.querySelector('#fileUpload');
 const filenameInput = document.querySelector('#filename');
 
-const settings = localStorage.settings
-  ? JSON.parse(localStorage.settings)  : defaultSettings;
+const settings = {};
+
+Object.keys(localStorage).forEach(key => {
+  settings[key] = typeof defaultSettings[key] === 'number' ? +localStorage[key] : localStorage[key];
+});
+
+Object.keys(defaultSettings).forEach(key => {
+  if (!localStorage[key]) {
+    settings[key] = defaultSettings[key];
+  }
+});
 
 console.log(settings);
-
-function pipe(input, ...funcs) {
-  let output = input;
-  funcs.forEach(func => {
-    output = func(output);
-  });
-  return output;
-}
 
 function guessFps(maxFrame) {
   const fpses = [24, 25, 30, 50, 60];
@@ -44,21 +46,23 @@ function hide(el) {
   el.classList.add('hidden');
 }
 
-
-
-let inputSource;
+let inputSource = '';
 
 fileUpload.addEventListener('change', () => {
   const fileReader = new FileReader;
-  fileReader.readAsText(fileUpload.files[0], 'UTF-8');
-  fileReader.addEventListener('load', e => {
-    inputSource = e.target.result;
-    const fileSplit = fileUpload.value ? fileUpload.value.split(/[\\\/]/) : undefined;
-    const filename = fileSplit ? fileSplit[fileSplit.length - 1].match(/(.+)\.\w+$/)[1] : undefined;
-    filenameInput.value = filename;
-  });
+  const file = fileUpload.files[0];
+  if (file) {
+    fileReader.readAsText(file, 'UTF-8');
+    fileReader.addEventListener('load', e => {
+      inputSource = e.target.result;
+      const fileSplit = fileUpload.value ? fileUpload.value.split(/[\\\/]/) : undefined;
+      const filename = fileSplit ? fileSplit[fileSplit.length - 1].match(/(.+)\.\w+$/)[1] : undefined;
+      filenameInput.value = filename;
+    });
+  } else {
+    inputSource = '';
+  }
 });
-
 
 conversionForm.addEventListener('submit', e => {
   e.preventDefault();
@@ -92,8 +96,14 @@ conversionForm.addEventListener('submit', e => {
   }
   
   if (!outputArr.length) {
-    alert('Uploaded file is invalid. Please upload a text file with \
+    if (inputSource === '') {
+      alert('No file selected or the selected file is empty. \
+Please upload a text file with \
 timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
+    } else {
+      alert('Uploaded file is invalid. Please upload a text file with \
+timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
+    }
     return;
   }
 
@@ -138,23 +148,43 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
     return {hr, min, sec, ms};
   }
 
-
   function getTimestamp(totalMs) {
-    const vals = getHrsMinsSecsMs(totalMs);
+    const vals = getHrsMinsSecsMs(totalMs + settings.offset);
 
     return `${('' + vals.hr).padStart(2, '0')}:${('' + vals.min).padStart(2, '0')}:${('' + vals.sec).padStart(2, '0')},${('' + vals.ms).padStart(3, '0')}`;
   }
 
   function parseBold(contentStr) {
-    return contentStr.replace(/(^|[\b\W])([\*_])\2([\s\S]+?)\2\2($|[\b\W])/g, '$1<b>$3</b>$4');
+    if (settings.convertBold === 0) {
+      return contentStr;
+    } else {
+      const tags = settings.convertBold === 1
+      ? ['<b>', '</b>']
+      : ['', ''];
+      return contentStr.replace(/(^|[\b\W])([\*_])\2([\s\S]+?)\2\2($|[\b\W])/g, `$1${tags[0]}$3${tags[1]}$4`);
+    }
   }
 
   function parseItalics(contentStr) {
-    return contentStr.replace(/(^|[\b\W])([\*_])([\s\S]+?)\2($|[\b\W])/g, '$1<i>$3</i>$4');
+    if (settings.convertItalics === 0) {
+      return contentStr;
+    } else {
+      const tags = settings.convertItalics === 1
+      ? ['<i>', '</i>']
+      : ['', ''];
+      return contentStr.replace(/(^|[\b\W])([\*_])([\s\S]+?)\2($|[\b\W])/g, `$1${tags[0]}$3${tags[1]}$4`);
+    }
   }
 
   function parseMusic(contentStr) {
-    return contentStr.replace(/^#\s?([\s\S]+?)\s?#$/g,'♫ $1 ♫');
+    if (settings.convertMusic === 0) {
+      return contentStr;
+    } else {
+      const tags = settings.convertMusic === 1
+      ? ['♫', '♫']
+      : ['', ''];
+      return contentStr.replace(/^#\s?([\s\S]+?)\s?#$/g,`${tags[0]} $1 ${tags[1]}`);
+    }
   }
 
   function getOutput() {
@@ -191,18 +221,18 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
       const startTime = getTimestamp(startMs);
 
       const endTime = 
-        nextStartMs === undefined || nextStartMs - startMs > settings.timing.maxKeyframe
-        ? getTimestamp(startMs + settings.timing.maxKeyframe)
+        nextStartMs === undefined || nextStartMs - startMs > settings.maxKeyframe
+        ? getTimestamp(startMs + settings.maxKeyframe)
         : getTimestamp(nextStartMs - 1);
 
       appendLine(`${startTime} --> ${endTime}`)
 
       appendContentLines(st.lines);
 
-      /*if (st.lines.length > settings.warnings.maxLineNo) {
+      /*if (st.lines.length > settings.warnMaxLineNo) {
         warnings.push(1);
       }
-      if (st.lines.some((line) => line.length > settings.warnings.maxLineLength)) {
+      if (st.lines.some((line) => line.length > settings.warnMaxLineLength)) {
         warnings.push(2);
       }*/ //TODO: add warning functionality w. line number
             
