@@ -6,6 +6,7 @@ const conversionForm = document.querySelector('#conversionForm');
 const outputDisplay = document.querySelector('#output');
 const warningDisplay = document.querySelector('#warnings');
 const fileUpload = document.querySelector('#fileUpload');
+const filenameInput = document.querySelector('#filename');
 
 const settings = localStorage.settings
   ? JSON.parse(localStorage.settings)  : defaultSettings;
@@ -50,7 +51,12 @@ let inputSource;
 fileUpload.addEventListener('change', () => {
   const fileReader = new FileReader;
   fileReader.readAsText(fileUpload.files[0], 'UTF-8');
-  fileReader.addEventListener('load', e => {inputSource = e.target.result});
+  fileReader.addEventListener('load', e => {
+    inputSource = e.target.result;
+    const fileSplit = fileUpload.value ? fileUpload.value.split(/[\\\/]/) : undefined;
+    const filename = fileSplit ? fileSplit[fileSplit.length - 1].match(/(.+)\.\w+$/)[1] : undefined;
+    filenameInput.value = filename;
+  });
 });
 
 
@@ -214,6 +220,7 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
   const uri = `data:text/plain;charset=utf-8,\uFEFF${encodeURIComponent(output)}`;
 
   const dummyLink = document.createElement('a');
+
   dummyLink.setAttribute('download', `${document.querySelector('#filename').value}.srt`);
   dummyLink.setAttribute('href', uri);
   dummyLink.click();
