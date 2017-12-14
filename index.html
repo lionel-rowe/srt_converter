@@ -13,11 +13,24 @@
         <div>
           <input type="file" id="fileUpload" accept=".txt">
         </div>
-        <label for="">Output file name: 
-          <input type="text" id="filename">
-          <span class="extension">.srt</span>
-        </label>
-        <input type="submit" value="Convert">
+        <div>
+          <label for="offset">Offset (ms): 
+            <input type="number" id="offset" value="0">
+          </label>
+          <label for="fontBase">English font: 
+            <input type="text" id="fontBase" value="Arial">
+          </label>
+          <label for="fontCjk">Chinese font: 
+            <input type="text" id="fontCjk" value="KaiTi">
+          </label>
+        </div>
+        <div>
+          <label for="filename">Output file name: 
+            <input type="text" id="filename">
+            <span class="extension">.srt</span>
+          </label>
+          <input type="submit" value="Convert">
+        </div>
       </form>
     </div>
     <div class="section">

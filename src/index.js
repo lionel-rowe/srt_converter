@@ -3,22 +3,27 @@ import {pipe} from './helpers.js';
 
 const CRLF = '\r\n';
 
+const cjkRegex = /((?:[\u4E00-\u9FCC\u3400-\u4DB5\uFA0E\uFA0F\uFA11\uFA13\uFA14\uFA1F\uFA21\uFA23\uFA24\uFA27-\uFA29]|[\ud840-\ud868][\udc00-\udfff]|\ud869[\udc00-\uded6\udf00-\udfff]|[\ud86a-\ud86c][\udc00-\udfff]|\ud86d[\udc00-\udf34\udf40-\udfff]|\ud86e[\udc00-\udc1d]|[。，、；：《》『』【】（）～！￥？])+)/g;
+
 const conversionForm = document.querySelector('#conversionForm');
 const outputDisplay = document.querySelector('#output');
 const warningDisplay = document.querySelector('#warnings');
 const fileUpload = document.querySelector('#fileUpload');
 const filenameInput = document.querySelector('#filename');
+const offsetInput = document.querySelector('#offset');
+const fontBaseInput = document.querySelector('#fontBase');
+const fontCjkInput = document.querySelector('#fontCjk');
 
 const settings = {};
 
-Object.keys(localStorage).forEach(key => {
-  settings[key] = typeof defaultSettings[key] === 'number' ? +localStorage[key] : localStorage[key];
-});
+// Object.keys(localStorage).forEach(key => {
+//   settings[key] = typeof defaultSettings[key] === 'number' ? +localStorage[key] : localStorage[key];
+// });
 
 Object.keys(defaultSettings).forEach(key => {
-  if (!localStorage[key]) {
+  // if (!localStorage[key]) {
     settings[key] = defaultSettings[key];
-  }
+  // }
 });
 
 console.log(settings);
@@ -36,6 +41,43 @@ function escapeHTML(str) {
 
 function unescapeAllowedTags(str) {
   return str.replace(/&lt;((?:[bi]|font color=(["'])[#0-9a-zA-Z]+?\2)|(?:\/(?:[bi]|font)))&gt;/g, '<$1>')
+}
+
+function addFonts(contentStr) {
+  return contentStr.replace(cjkRegex, `{\\fn${fontCjkInput.value}}$1{\\fn${fontBaseInput.value}}`);
+}
+
+function parseBold(contentStr) {
+  if (settings.convertBold === 0) {
+    return contentStr;
+  } else {
+    const tags = settings.convertBold === 1
+    ? ['<b>', '</b>']
+    : ['', ''];
+    return contentStr.replace(/(^|[\b\W])([\*_])\2([\s\S]+?)\2\2($|[\b\W])/g, `$1${tags[0]}$3${tags[1]}$4`);
+  }
+}
+
+function parseItalics(contentStr) {
+  if (settings.convertItalics === 0) {
+    return contentStr;
+  } else {
+    const tags = settings.convertItalics === 1
+    ? ['<i>', '</i>']
+    : ['', ''];
+    return contentStr.replace(/(^|[\b\W])([\*_])([\s\S]+?)\2($|[\b\W])/g, `$1${tags[0]}$3${tags[1]}$4`);
+  }
+}
+
+function parseMusic(contentStr) {
+  if (settings.convertMusic === 0) {
+    return contentStr;
+  } else {
+    const tags = settings.convertMusic === 1
+    ? ['♫', '♫']
+    : ['', ''];
+    return contentStr.replace(/^#\s?([\s\S]+?)\s?#$/g,`${tags[0]} $1 ${tags[1]}`);
+  }
 }
 
 function show(el) {
@@ -66,6 +108,8 @@ fileUpload.addEventListener('change', () => {
 
 conversionForm.addEventListener('submit', e => {
   e.preventDefault();
+
+  settings.offset = +offsetInput.value;
 
   hide(outputDisplay);
   hide(warningDisplay);
@@ -154,39 +198,6 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
     return `${('' + vals.hr).padStart(2, '0')}:${('' + vals.min).padStart(2, '0')}:${('' + vals.sec).padStart(2, '0')},${('' + vals.ms).padStart(3, '0')}`;
   }
 
-  function parseBold(contentStr) {
-    if (settings.convertBold === 0) {
-      return contentStr;
-    } else {
-      const tags = settings.convertBold === 1
-      ? ['<b>', '</b>']
-      : ['', ''];
-      return contentStr.replace(/(^|[\b\W])([\*_])\2([\s\S]+?)\2\2($|[\b\W])/g, `$1${tags[0]}$3${tags[1]}$4`);
-    }
-  }
-
-  function parseItalics(contentStr) {
-    if (settings.convertItalics === 0) {
-      return contentStr;
-    } else {
-      const tags = settings.convertItalics === 1
-      ? ['<i>', '</i>']
-      : ['', ''];
-      return contentStr.replace(/(^|[\b\W])([\*_])([\s\S]+?)\2($|[\b\W])/g, `$1${tags[0]}$3${tags[1]}$4`);
-    }
-  }
-
-  function parseMusic(contentStr) {
-    if (settings.convertMusic === 0) {
-      return contentStr;
-    } else {
-      const tags = settings.convertMusic === 1
-      ? ['♫', '♫']
-      : ['', ''];
-      return contentStr.replace(/^#\s?([\s\S]+?)\s?#$/g,`${tags[0]} $1 ${tags[1]}`);
-    }
-  }
-
   function getOutput() {
     let output = '';
     let lineNumber = 1;
@@ -200,7 +211,7 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
     function appendContentLines(lines) { //as arr of strs
       const numOfLines = lines.length;
       const contentStr = lines.map(line => line.trim()).join(CRLF);
-      const parsedContentStr = pipe(contentStr, parseBold, parseItalics, parseMusic);
+      const parsedContentStr = pipe(`{\\fn${fontBaseInput.value}}${contentStr}`, parseBold, parseItalics, parseMusic, addFonts);
 
       output += parsedContentStr;
       output += CRLF;
