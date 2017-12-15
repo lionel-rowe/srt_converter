@@ -2,7 +2,6 @@ import {defaultSettings} from './defaultSettings.js';
 import {pipe} from './helpers.js';
 
 const CRLF = '\r\n';
-
 const cjkRegex = /((?:[\u4E00-\u9FCC\u3400-\u4DB5\uFA0E\uFA0F\uFA11\uFA13\uFA14\uFA1F\uFA21\uFA23\uFA24\uFA27-\uFA29]|[\ud840-\ud868][\udc00-\udfff]|\ud869[\udc00-\uded6\udf00-\udfff]|[\ud86a-\ud86c][\udc00-\udfff]|\ud86d[\udc00-\udf34\udf40-\udfff]|\ud86e[\udc00-\udc1d]|[。，、；：《》『』【】（）～！￥？])+)/g;
 
 const conversionForm = document.querySelector('#conversionForm');
@@ -39,8 +38,12 @@ function escapeHTML(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function unescapeAllowedTags(str) {
-  return str.replace(/&lt;((?:[bi]|font color=(["'])[#0-9a-zA-Z]+?\2)|(?:\/(?:[bi]|font)))&gt;/g, '<$1>')
+// function unescapeAllowedTags(str) {
+//   return str.replace(/&lt;((?:[bi]|font color=(["'])[#0-9a-zA-Z]+?\2)|(?:\/(?:[bi]|font)))&gt;/g, '<$1>')
+// }
+
+function commentOut(contentLine) {
+  return /^\/\//.test(contentLine) ? `{\\${contentLine.slice(2)}}` : contentLine;
 }
 
 function addFonts(contentStr) {
@@ -52,7 +55,7 @@ function parseBold(contentStr) {
     return contentStr;
   } else {
     const tags = settings.convertBold === 1
-    ? ['<b>', '</b>']
+    ? ['{\\b1}', '{\\b0}']
     : ['', ''];
     return contentStr.replace(/(^|[\b\W])([\*_])\2([\s\S]+?)\2\2($|[\b\W])/g, `$1${tags[0]}$3${tags[1]}$4`);
   }
@@ -63,7 +66,7 @@ function parseItalics(contentStr) {
     return contentStr;
   } else {
     const tags = settings.convertItalics === 1
-    ? ['<i>', '</i>']
+    ? ['{\\i1}', '{\\i0}']
     : ['', ''];
     return contentStr.replace(/(^|[\b\W])([\*_])([\s\S]+?)\2($|[\b\W])/g, `$1${tags[0]}$3${tags[1]}$4`);
   }
@@ -210,8 +213,8 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
 
     function appendContentLines(lines) { //as arr of strs
       const numOfLines = lines.length;
-      const contentStr = lines.map(line => line.trim()).join(CRLF);
-      const parsedContentStr = pipe(`{\\fn${fontBaseInput.value}}${contentStr}`, parseBold, parseItalics, parseMusic, addFonts);
+      const contentStr = lines.map(line => commentOut(line.trim())).join(CRLF);
+      const parsedContentStr = `{\\fn${fontBaseInput.value}}${pipe(contentStr, addFonts, parseBold, parseItalics, parseMusic)}`;
 
       output += parsedContentStr;
       output += CRLF;
@@ -269,7 +272,7 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
   show(outputDisplay);
   outputDisplay.innerHTML = output.split(CRLF).map((el, idx) => {
 
-    return `<div class="lineContent" data-linenumber="${idx + 1}">${pipe(el, escapeHTML, unescapeAllowedTags)}</div>`;
+    return `<div class="lineContent" data-linenumber="${idx + 1}">${pipe(el, escapeHTML)}</div>`;
   }).join(CRLF);
 
 /*  if (warnings.length) {
@@ -302,3 +305,56 @@ no of chars (and update SG to reflect this)
 /*TODO: add tests (incl. overall functionality, line length + no, markdown + music note support)*/
 
 });
+
+const widthInput = document.querySelector('#width');
+const heightInput = document.querySelector('#height');
+const xCoordInput = document.querySelector('#xCoord');
+const yCoordInput = document.querySelector('#yCoord');
+const positionStampOutput = document.querySelector('#positionStamp');
+
+function showPositionStamp() {
+
+  const width = widthInput.value;
+  const height = heightInput.value;
+  const xCoord = xCoordInput.value;
+  const yCoord = yCoordInput.value;
+
+  positionStampOutput.value = `{\\pos(${Math.round(width / 100 * xCoord)},${Math.round(height / 100 * yCoord)})}`
+
+}
+
+showPositionStamp();
+
+[widthInput, heightInput, xCoordInput, yCoordInput].forEach(el => {
+  el.addEventListener('input', showPositionStamp);
+});
+
+positionStampOutput.addEventListener('click', e => {
+  positionStampOutput.setSelectionRange(0, positionStampOutput.value.length);
+});
+
+/*
+
+        <div>
+          <label for="width">Width (px): 
+            <input type="number" id="width" value="1920">
+          </label>
+          <label for="height">Height (px): 
+            <input type="number" id="height" value="1080">
+          </label>
+        </div>
+        <div>
+          <label for="xCoord">x: 
+            <input type="number" id="xCoord" value="50">
+            %
+          </label>
+          <label for="yCoord">y: 
+            <input type="number" id="yCoord" value="50">
+            %
+          </label>
+        </div>
+        <div>
+          <input type="text" id="positionStamp" disabled>
+        </div>
+
+*/

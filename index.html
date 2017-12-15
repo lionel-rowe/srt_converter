@@ -8,6 +8,32 @@
   <body>
     <!-- <a class="topIcon" href="settings.html"><i>[SETTINGS]</i></a> --> <!-- TODO: use FA -->
     <h1>InqScribe → SRT Converter</h1>
+    <div>
+      <form id="positionStamper">
+        <h2>Position Stamp</h2>
+        <div>
+          <label for="width">Width (px): 
+            <input type="number" id="width" value="1920">
+          </label>
+          <label for="height">Height (px): 
+            <input type="number" id="height" value="1080">
+          </label>
+        </div>
+        <div>
+          <label for="xCoord">x: 
+            <input type="number" id="xCoord" value="50" min="0" max="100">
+            %
+          </label>
+          <label for="yCoord">y: 
+            <input type="number" id="yCoord" value="50" min="0" max="100">
+            %
+          </label>
+        </div>
+        <div>
+          <input type="text" id="positionStamp">
+        </div>
+      </form>
+    </div>
     <div class="section">
       <form id="conversionForm">
         <div>

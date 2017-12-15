@@ -69,3 +69,15 @@ input[type="number"] {
   margin: 5px 0;
   width: 5em;
 }
+
+#positionStamper {
+  float: right;
+  position: relative;
+  top: -70px;
+}
+
+#positionStamp {
+  background: #fff;
+  cursor: pointer;
+  font-family: 'Consolas', monospace;
+}

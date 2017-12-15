@@ -33,6 +33,9 @@
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
 /******/
+/******/ 	// identity function for calling harmony imports with the correct context
+/******/ 	__webpack_require__.i = function(value) { return value; };
+/******/
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
@@ -60,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -95,14 +98,27 @@ const defaultSettings = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = pipe;
+function pipe(input, ...funcs) {
+  let output = input;
+  funcs.forEach(func => {
+    output = func(output);
+  });
+  return output;
+}
+
+/***/ }),
+/* 2 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__defaultSettings_js__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__helpers_js__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__helpers_js__ = __webpack_require__(1);
 
 
 
 const CRLF = '\r\n';
-
 const cjkRegex = /((?:[\u4E00-\u9FCC\u3400-\u4DB5\uFA0E\uFA0F\uFA11\uFA13\uFA14\uFA1F\uFA21\uFA23\uFA24\uFA27-\uFA29]|[\ud840-\ud868][\udc00-\udfff]|\ud869[\udc00-\uded6\udf00-\udfff]|[\ud86a-\ud86c][\udc00-\udfff]|\ud86d[\udc00-\udf34\udf40-\udfff]|\ud86e[\udc00-\udc1d]|[。，、；：《》『』【】（）～！￥？])+)/g;
 
 const conversionForm = document.querySelector('#conversionForm');
@@ -139,8 +155,13 @@ function escapeHTML(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function unescapeAllowedTags(str) {
-  return str.replace(/&lt;((?:[bi]|font color=(["'])[#0-9a-zA-Z]+?\2)|(?:\/(?:[bi]|font)))&gt;/g, '<$1>');
+// function unescapeAllowedTags(str) {
+//   return str.replace(/&lt;((?:[bi]|font color=(["'])[#0-9a-zA-Z]+?\2)|(?:\/(?:[bi]|font)))&gt;/g, '<$1>')
+// }
+
+function commentOut(contentLine) {
+  return (/^\/\//.test(contentLine) ? `{\\${contentLine.slice(2)}}` : contentLine
+  );
 }
 
 function addFonts(contentStr) {
@@ -151,7 +172,7 @@ function parseBold(contentStr) {
   if (settings.convertBold === 0) {
     return contentStr;
   } else {
-    const tags = settings.convertBold === 1 ? ['<b>', '</b>'] : ['', ''];
+    const tags = settings.convertBold === 1 ? ['{\\b1}', '{\\b0}'] : ['', ''];
     return contentStr.replace(/(^|[\b\W])([\*_])\2([\s\S]+?)\2\2($|[\b\W])/g, `$1${tags[0]}$3${tags[1]}$4`);
   }
 }
@@ -160,7 +181,7 @@ function parseItalics(contentStr) {
   if (settings.convertItalics === 0) {
     return contentStr;
   } else {
-    const tags = settings.convertItalics === 1 ? ['<i>', '</i>'] : ['', ''];
+    const tags = settings.convertItalics === 1 ? ['{\\i1}', '{\\i0}'] : ['', ''];
     return contentStr.replace(/(^|[\b\W])([\*_])([\s\S]+?)\2($|[\b\W])/g, `$1${tags[0]}$3${tags[1]}$4`);
   }
 }
@@ -299,8 +320,8 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
     function appendContentLines(lines) {
       //as arr of strs
       const numOfLines = lines.length;
-      const contentStr = lines.map(line => line.trim()).join(CRLF);
-      const parsedContentStr = Object(__WEBPACK_IMPORTED_MODULE_1__helpers_js__["a" /* pipe */])(`{\\fn${fontBaseInput.value}}${contentStr}`, parseBold, parseItalics, parseMusic, addFonts);
+      const contentStr = lines.map(line => commentOut(line.trim())).join(CRLF);
+      const parsedContentStr = `{\\fn${fontBaseInput.value}}${__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__helpers_js__["a" /* pipe */])(contentStr, addFonts, parseBold, parseItalics, parseMusic)}`;
 
       output += parsedContentStr;
       output += CRLF;
@@ -352,7 +373,7 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
   show(outputDisplay);
   outputDisplay.innerHTML = output.split(CRLF).map((el, idx) => {
 
-    return `<div class="lineContent" data-linenumber="${idx + 1}">${Object(__WEBPACK_IMPORTED_MODULE_1__helpers_js__["a" /* pipe */])(el, escapeHTML, unescapeAllowedTags)}</div>`;
+    return `<div class="lineContent" data-linenumber="${idx + 1}">${__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__helpers_js__["a" /* pipe */])(el, escapeHTML)}</div>`;
   }).join(CRLF);
 
   /*  if (warnings.length) {
@@ -385,19 +406,57 @@ timestamps in the format "[hh:mm:ss.ff]" (hours, minutes, seconds, frames).');
   /*TODO: add tests (incl. overall functionality, line length + no, markdown + music note support)*/
 });
 
-/***/ }),
-/* 2 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+const widthInput = document.querySelector('#width');
+const heightInput = document.querySelector('#height');
+const xCoordInput = document.querySelector('#xCoord');
+const yCoordInput = document.querySelector('#yCoord');
+const positionStampOutput = document.querySelector('#positionStamp');
 
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = pipe;
-function pipe(input, ...funcs) {
-  let output = input;
-  funcs.forEach(func => {
-    output = func(output);
-  });
-  return output;
+function showPositionStamp() {
+
+  const width = widthInput.value;
+  const height = heightInput.value;
+  const xCoord = xCoordInput.value;
+  const yCoord = yCoordInput.value;
+
+  positionStampOutput.value = `{\\pos(${Math.round(width / 100 * xCoord)},${Math.round(height / 100 * yCoord)})}`;
 }
+
+showPositionStamp();
+
+[widthInput, heightInput, xCoordInput, yCoordInput].forEach(el => {
+  el.addEventListener('input', showPositionStamp);
+});
+
+positionStampOutput.addEventListener('click', e => {
+  positionStampOutput.setSelectionRange(0, positionStampOutput.value.length);
+});
+
+/*
+
+        <div>
+          <label for="width">Width (px): 
+            <input type="number" id="width" value="1920">
+          </label>
+          <label for="height">Height (px): 
+            <input type="number" id="height" value="1080">
+          </label>
+        </div>
+        <div>
+          <label for="xCoord">x: 
+            <input type="number" id="xCoord" value="50">
+            %
+          </label>
+          <label for="yCoord">y: 
+            <input type="number" id="yCoord" value="50">
+            %
+          </label>
+        </div>
+        <div>
+          <input type="text" id="positionStamp" disabled>
+        </div>
+
+*/
 
 /***/ })
 /******/ ]);
